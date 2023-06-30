@@ -1,10 +1,6 @@
 
 (() => {
 
-	const log = (...args) => {
-		window.console && console.log(...args);
-	};
-
 	let localStorageAvailable = false;
 	try {
 		localStorage._available = true;
@@ -80,12 +76,12 @@
 		let save_paused = false;
 		if (!canvas_has_any_apparent_image_data()) {
 			if (!window_is_open) {
-				show_recovery_window();
+				//show_recovery_window();
 			}
 			save_paused = true;
 		} else if (window_is_open) {
 			if (undos.length > last_undos_length) {
-				show_recovery_window(true);
+				//show_recovery_window(true);
 			}
 			save_paused = true;
 		}
@@ -97,14 +93,14 @@
 		constructor(session_id) {
 			this.id = session_id;
 			const lsid = `image#${session_id}`;
-			log(`Local storage ID: ${lsid}`);
+			console.log(`Local storage ID: ${lsid}`);
 			// save image to storage
 			this.save_image_to_storage_immediately = () => {
 				const save_paused = handle_data_loss();
 				if (save_paused) {
 					return;
 				}
-				log(`Saving image to storage: ${lsid}`);
+				console.log(`Saving image to storage: ${lsid}`);
 				storage.set(lsid, main_canvas.toDataURL("image/png"), err => {
 					if (err) {
 						if (err.quotaExceeded) {
@@ -115,6 +111,8 @@
 							// (or there's some other error?)
 							// @TODO: show warning with "Don't tell me again" type option
 						}
+					} else {
+						saved = true;
 					}
 				});
 			};
@@ -137,10 +135,6 @@
 					}, (error) => {
 						show_error_message("Failed to open image from local storage.", error);
 					});
-				}
-				else {
-					// no uri so lets save the blank canvas
-					this.save_image_to_storage_soon();
 				}
 			});
 			$G.on("session-update.session-hook", this.save_image_to_storage_soon);
@@ -345,28 +339,28 @@
 				// Sync the data from this client to the server (one-way)
 				const uri = main_canvas.toDataURL();
 				if (previous_uri !== uri) {
-					// log("clear pointer operations to set data", pointer_operations);
+					// console.log("clear pointer operations to set data", pointer_operations);
 					// pointer_operations = [];
-					log("Write canvas data to Firebase");
+					console.log("Write canvas data to Firebase");
 					this.fb_data.set(uri);
 					previous_uri = uri;
 				}
 				else {
-					log("(Don't write canvas data to Firebase; it hasn't changed)");
+					console.log("(Don't write canvas data to Firebase; it hasn't changed)");
 				}
 			};
 			this.write_canvas_to_database_soon = debounce(this.write_canvas_to_database_immediately, 100);
 			let ignore_session_update = false;
 			$G.on("session-update.session-hook", () => {
 				if (ignore_session_update) {
-					log("(Ignore session-update from Sync Session undoable)");
+					console.log("(Ignore session-update from Sync Session undoable)");
 					return;
 				}
 				this.write_canvas_to_database_soon();
 			});
 			// Any time we change or receive the image data
 			_fb_on(this.fb_data, "value", snap => {
-				log("Firebase data update");
+				console.log("Firebase data update");
 				const uri = snap.val();
 				if (uri == null) {
 					// If there's no value at the data location, this is a new session
@@ -405,7 +399,7 @@
 						// and other options will be established)
 						/*
 						// Playback recorded in-progress pointer operations
-						log("Playback", pointer_operations);
+						console.log("Playback", pointer_operations);
 
 						for (const e of pointer_operations) {
 							// Trigger the event at each place it is listened for
@@ -476,7 +470,7 @@
 			// $canvas_area.off("pointerdown.session-hook");
 			// Remove collected Firebase event listeners
 			this._fb_listeners.forEach(({ fb, event_type, callback/*, error_callback*/ }) => {
-				log(`Remove listener for ${fb.path.toString()} .on ${event_type}`);
+				console.log(`Remove listener for ${fb.path.toString()} .on ${event_type}`);
 				fb.off(event_type, callback);
 			});
 			this._fb_listeners.length = 0;
@@ -496,7 +490,7 @@
 	let current_session;
 	const end_current_session = () => {
 		if (current_session) {
-			log("Ending current session");
+			console.log("Ending current session");
 			current_session.end();
 			current_session = null;
 		}
@@ -509,27 +503,28 @@
 			const local = session_match[1].toLowerCase() === "local";
 			const session_id = session_match[2];
 			if (session_id === "") {
-				log("Invalid session ID; session ID cannot be empty");
+				console.log("Invalid session ID; session ID cannot be empty");
 				end_current_session();
 			} else if (!local && session_id.match(/[./[\]#$]/)) {
-				log("Session ID is not a valid Firebase location; it cannot contain any of ./[]#$");
+				console.log("Session ID is not a valid Firebase location; it cannot contain any of ./[]#$");
 				end_current_session();
 			} else if (!session_id.match(/[-0-9A-Za-z\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u02af\u1d00-\u1d25\u1d62-\u1d65\u1d6b-\u1d77\u1d79-\u1d9a\u1e00-\u1eff\u2090-\u2094\u2184-\u2184\u2488-\u2490\u271d-\u271d\u2c60-\u2c7c\u2c7e-\u2c7f\ua722-\ua76f\ua771-\ua787\ua78b-\ua78c\ua7fb-\ua7ff\ufb00-\ufb06]+/)) {
-				log("Invalid session ID; it must consist of 'alphanumeric-esque' characters");
+				console.log("Invalid session ID; it must consist of 'alphanumeric-esque' characters");
 				end_current_session();
 			} else if (
 				current_session && current_session.id === session_id &&
 				local === (current_session instanceof LocalSession)
 			) {
-				log("Hash changed but the session ID and session type are the same");
+				console.log("Hash changed but the session ID and session type are the same");
+			
 			} else {
 				// @TODO: Ask if you want to save before starting a new session
 				end_current_session();
 				if (local) {
-					log(`Starting a new LocalSession, ID: ${session_id}`);
+					console.log(`Starting a new LocalSession, ID: ${session_id}`);
 					current_session = new LocalSession(session_id);
 				} else {
-					log(`Starting a new MultiUserSession, ID: ${session_id}`);
+					console.log(`Starting a new MultiUserSession, ID: ${session_id}`);
 					current_session = new MultiUserSession(session_id);
 				}
 			}
@@ -542,7 +537,7 @@
 				return;
 			}
 
-			log("Switching to new session from #load: URL (to #local: URL with session ID)");
+			console.log("Switching to new session from #load: URL (to #local: URL with session ID)");
 			// Note: could use into_existing_session=false on open_from_image_info instead of creating the new session beforehand
 			end_current_session();
 			change_url_param("local", generate_session_id());
@@ -552,11 +547,11 @@
 			}, show_resource_load_error_message);
 
 		} else {
-			log("No session ID in hash");
+			console.log("No session ID in hash");
 			const old_hash = location.hash;
 			end_current_session();
 			change_url_param("local", generate_session_id(), { replace_history_state: true });
-			log("After replaceState:", location.hash);
+			console.log("After replaceState:", location.hash);
 			if (old_hash === location.hash) {
 				// e.g. on Wayback Machine
 				show_error_message("Autosave is disabled. Failed to update URL to start session.");
@@ -567,15 +562,15 @@
 	};
 
 	$G.on("hashchange popstate change-url-params", e => {
-		log(e.type, location.hash);
+		console.log(e.type, location.hash);
 		update_session_from_location_hash();
 	});
-	log("Initializing with location hash:", location.hash);
+	console.log("Initializing with location hash:", location.hash);
 	update_session_from_location_hash();
 
 	window.new_local_session = () => {
 		end_current_session();
-		log("Changing URL to start new session...");
+		console.log("Changing URL to start new session...");
 		change_url_param("local", generate_session_id());
 	};
 
