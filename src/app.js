@@ -2,13 +2,14 @@
 const default_magnification = 1;
 const default_tool = get_tool_by_id(TOOL_PENCIL);
 
-const default_canvas_width = 683;
-const default_canvas_height = 384;
+var searchParams = new URLSearchParams(document.location.search);
+const default_canvas_width = parseInt(searchParams.get("width")) || 683;
+const default_canvas_height = parseInt(searchParams.get("height")) || 384;
 let my_canvas_width = default_canvas_width;
 let my_canvas_height = default_canvas_height;
 
 let aliasing = true;
-let transparency = false;
+let transparency = true;
 let monochrome = false;
 
 let magnification = default_magnification;
