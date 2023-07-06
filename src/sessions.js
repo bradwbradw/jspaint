@@ -101,6 +101,7 @@
 					return;
 				}
 				console.log(`Saving image to storage: ${lsid}`);
+				$G.triggerHandler("persisted-image");
 				storage.set(lsid, main_canvas.toDataURL("image/png"), err => {
 					if (err) {
 						if (err.quotaExceeded) {
