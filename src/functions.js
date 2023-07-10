@@ -853,7 +853,7 @@ function open_from_image_info(info, callback, canceled, into_existing_session, f
 
 		main_ctx.copy(info.image || info.image_data);
 		apply_file_format_and_palette_info(info);
-		transparency = has_any_transparency(main_ctx);
+		transparency = true;//has_any_transparency(main_ctx);
 		$canvas_area.trigger("resize");
 
 		current_history_node.name = localize("Open");
