@@ -6,6 +6,7 @@
 	"search.exclude": {
 		"**/images": true,
 		"**/lib": true,
+		"**/localization": true,
 		"**/out": true
 	},
 	"editor.formatOnSave": false,
