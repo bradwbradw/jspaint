@@ -1,5 +1,5 @@
 ((exports) => {
-
+	
 	// @TODO:
 	// - Persist custom colors list across reloads? It's not very persistent in real Windows...
 	// - maybe use https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/Grid_Role
@@ -137,17 +137,17 @@
 				selected_colors.ternary = "";
 				$G.triggerHandler("option-changed");
 			} else {
-				palette[swatch_index] = color;
+				persistPalette(swatch_index,color);
 				update_$swatch($swatch_to_edit, color);
 				selected_colors[color_selection_slot_to_edit] = color;
 				$G.triggerHandler("option-changed");
-				window.console && console.log(`Updated palette: ${palette.map(() => `%c█`).join("")}`, ...palette.map((color) => `color: ${color};`));
 			}
 		});
 	}
 
 	// Repurposable color picker modeled after the Windows system color picker
 	function choose_color(initial_color, callback) {
+
 		if ($edit_colors_window) {
 			$edit_colors_window.close();
 		}

@@ -3528,9 +3528,9 @@ function read_image_file(blob, callback) {
 					palette = new Array(tabs.PLTE.length / 3);
 					for (let i = 0; i < palette.length; i++) {
 						if (tabs.tRNS && tabs.tRNS.length >= i + 1) {
-							palette[i] = `rgba(${tabs.PLTE[i * 3 + 0]}, ${tabs.PLTE[i * 3 + 1]}, ${tabs.PLTE[i * 3 + 2]}, ${tabs.tRNS[i] / 255})`;
+							persistPalette(i, `rgba(${tabs.PLTE[i * 3 + 0]}, ${tabs.PLTE[i * 3 + 1]}, ${tabs.PLTE[i * 3 + 2]}, ${tabs.tRNS[i] / 255})`);
 						} else {
-							palette[i] = `rgb(${tabs.PLTE[i * 3 + 0]}, ${tabs.PLTE[i * 3 + 1]}, ${tabs.PLTE[i * 3 + 2]})`;
+							persistPalette(i, `rgb(${tabs.PLTE[i * 3 + 0]}, ${tabs.PLTE[i * 3 + 1]}, ${tabs.PLTE[i * 3 + 2]})`);
 						}
 					}
 					monochrome = false;

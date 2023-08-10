@@ -59,7 +59,7 @@
 		} catch (error) { }
 
 		const signal_theme_load = () => {
-			$(window).triggerHandler("theme-load");
+			update_palette_from_theme();
 			$(window).trigger("resize"); // not exactly, but get dynamic cursor to update its offset
 		};
 

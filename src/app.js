@@ -82,6 +82,23 @@ const monochrome_palette_as_colors = [
 	"rgb(137,137,137)",
 ];
 let palette = default_palette;
+	try {
+		var savedPalette = JSON.parse(localStorage.getItem("palette"));
+		if (savedPalette) {
+			palette = savedPalette;
+		}
+	} catch (err){
+		palette = default_palette;
+	}
+
+function persistPalette(index, color){
+	if(color){
+		palette[index] = color;
+	}
+	localStorage.setItem("palette", JSON.stringify(palette));
+
+	window.console && console.log(`Updated palette: ${palette.map(() => `%c█`).join("")}`, ...palette.map((color) => `color: ${color};`));
+}
 let polychrome_palette = palette;
 let monochrome_palette = make_monochrome_palette();
 
@@ -105,8 +122,19 @@ const basic_colors = [
 	"#000000", "#808000", "#808040", "#808080", "#408080", "#C0C0C0", "#400040", "#FFFFFF",
 ];
 let custom_colors = [
-	"#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF",
-	"#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF",
+  ...color_ramp(5, [200, 100, 100, 100], [200, 100, 10, 100]).slice(1),
+	"hsl(166.62857142857143deg, 85.56149732620321%, 48.12834224598931%)",
+  "hsl(142, 57%, 64%)",
+  "hsl(166, 93%, 38%)",
+  "#04ce1f",
+	"#FFFFFF",
+	"#FFFFFF",
+	"#FFFFFF",
+	"#FFFFFF",
+	"#FFFFFF",
+	"#FFFFFF",
+	"#FFFFFF",
+	"#FFFFFF",
 ];
 
 // This feature is not ready yet.
@@ -1298,17 +1326,17 @@ if (window.initial_system_file_handle) {
 	});
 }
 
-const lerp = (a, b, b_ness) => a + (b - a) * b_ness;
+function lerp(a, b, b_ness) { return a + (b - a) * b_ness};
 
-const color_ramp = (num_colors, start_hsla, end_hsla) =>
-	Array(num_colors).fill().map((_undefined, ramp_index, array) => {
+function color_ramp (num_colors, start_hsla, end_hsla) {
+	return Array(num_colors).fill().map((_undefined, ramp_index, array) => {
 		// TODO: should this use (array.length - 1)?
 		const h = lerp(start_hsla[0], end_hsla[0], ramp_index / array.length);
 		const s = lerp(start_hsla[1], end_hsla[1], ramp_index / array.length);
 		const l = lerp(start_hsla[2], end_hsla[2], ramp_index / array.length);
 		const a = lerp(start_hsla[3], end_hsla[3], ramp_index / array.length);
 		return `hsla(${h}deg, ${s}%, ${l}%, ${a})`;
-	});
+	});}
 
 const update_palette_from_theme = () => {
 	if (get_theme() === "winter.css") {
@@ -1388,13 +1416,10 @@ const update_palette_from_theme = () => {
 		];
 		$colorbox.rebuild_palette();
 	} else {
-		palette = default_palette;
 		$colorbox.rebuild_palette();
 	}
 };
 
-$G.on("theme-load", update_palette_from_theme);
-update_palette_from_theme();
 
 function to_canvas_coords({ clientX, clientY }) {
 	if (clientX === undefined || clientY === undefined) {
